@@ -54,13 +54,18 @@ export default class Register extends Component {
     this.onChangeUsername = this.onChangeUsername.bind(this);
     this.onChangeEmail = this.onChangeEmail.bind(this);
     this.onChangePassword = this.onChangePassword.bind(this);
+    this.onChangeCheckboxRole = this.onChangeCheckboxRole.bind(this);
+    
 
     this.state = {
       username: "",
       email: "",
       password: "",
+      checkboxRole: "employee",
       successful: false,
-      message: ""
+      message: "",
+      firstName: "",
+      lastName: "",
     };
   }
 
@@ -82,6 +87,13 @@ export default class Register extends Component {
     });
   }
 
+  onChangeCheckboxRole(e) {
+    this.setState({
+      checkboxRole: e.target.value
+    });
+
+  }
+
   handleRegister(e) {
     e.preventDefault();
 
@@ -96,7 +108,11 @@ export default class Register extends Component {
       AuthService.register(
         this.state.username,
         this.state.email,
-        this.state.password
+        this.state.password,
+        this.state.checkboxRole,
+        this.state.firstName,
+        this.state.lastName,
+
       ).then(
         response => {
           this.setState({
@@ -139,6 +155,13 @@ export default class Register extends Component {
           >
             {!this.state.successful && (
               <div>
+                <div className="form-group">
+                <label htmlFor="checkboxRole">Role</label>
+                <select className="form-control" id="checkboxRole" name="checkboxRole" value={this.state.checkboxRole} onChange={this.onChangeCheckboxRole}>
+                  <option value="user">employee</option>
+                  <option value="admin">admin</option>
+                </select>
+                </div>
                 <div className="form-group">
                   <label htmlFor="username">Username</label>
                   <Input

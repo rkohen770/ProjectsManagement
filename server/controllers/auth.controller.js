@@ -14,23 +14,24 @@ exports.signup = (req, res) => {
     username: req.body.username,
     email: req.body.email,
     password: bcrypt.hashSync(req.body.password, 8),
+    role: req.body.role,
+    firstName: req.body.firstName,
+    lastName: req.body.lastName,
   })
     .then((user) => {
-      if (req.body.roles) {
+      if (req.body.role) {
         Role.findAll({
           where: {
-            name: {
-              [Op.or]: req.body.roles,
-            },
+            name: req.body.role,
           },
-        }).then((roles) => {
-          user.setRoles(roles).then(() => {
+        }).then((role) => {
+          user.setRoles(role).then(() => {
             res.send({ message: "User was registered successfully!" });
           });
         });
       } else {
         // user role = 1
-        user.setRoles([1]).then(() => {
+        user.setRoles('employee').then(() => {
           res.send({ message: "User was registered successfully!" });
         });
       }
@@ -69,18 +70,12 @@ exports.signin = (req, res) => {
         expiresIn: 86400, // 24 hours
       });
 
-      var authorities = [];
-      user.getRoles().then((roles) => {
-        for (let i = 0; i < roles.length; i++) {
-          authorities.push("ROLE_" + roles[i].name.toUpperCase());
-        }
-        res.status(200).send({
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          roles: authorities,
-          accessToken: token,
-        });
+      res.status(200).send({
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        accessToken: token,
       });
     })
     .catch((err) => {
