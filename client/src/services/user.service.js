@@ -14,7 +14,7 @@ class UserService {
   }
 
   getEmployeeBoard() {
-    return axios.get(API_URL_TEST + 'mod', { headers: authHeader() });
+    return axios.get(API_URL_TEST + 'emp', { headers: authHeader() });
   }
 
   getAdminBoard() {

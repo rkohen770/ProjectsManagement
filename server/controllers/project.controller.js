@@ -1,60 +1,43 @@
 const db = require("../models");
-const User = db.user;
-exports.allAccess = (req, res) => {
-  res.status(200).send("Public Content.");
-};
-
-exports.userBoard = (req, res) => {
-  res.status(200).send("User Content.");
-};
-
-exports.adminBoard = (req, res) => {
-  res.status(200).send("Admin Content.");
-};
-
-exports.employeeBoard = (req, res) => {
-  res.status(200).send("Employee Content.");
-};
+const Project = db.project;
 
 exports.create = (req, res) => {
     // Validate request
-    if (!req.body.username) {
+    if (!req.body.name) {
         res.status(400).send({
             message: "Content can not be empty!"
         });
         return;
     }
 
-    // Create a User
-    const user = {
-        username: req.body.username,
-        email: req.body.email,
-        password: req.body.password,
-        role: req.body.role,
-        firstName: req.body.firstName,
-        lastName: req.body.lastName
+    // Create a Project
+    const project = {
+        name: req.body.name,
+        description: req.body.description,
+        deadline: req.body.deadline,
+        managerId: req.body.managerId
     };
 
-    // Save User in the database
-    User.create(user)
+    // Save Project in the database
+    Project.create(project)
         .then(data => {
             res.send(data);
         })
         .catch(err => {
             res.status(500).send({
-                message: err.message || "Some error occurred while creating the User."
+                message: err.message || "Some error occurred while creating the Project."
             });
         });
 };
 
 exports.findAll = (req, res) => {
-    User.findAll()
+    Project.findAll()
         .then(data => {
             res.send(data);
         })
         .catch(err => {
             res.status(500).send({
-                message: err.message || "Some error occurred while retrieving users."
+                message: err.message || "Some error occurred while retrieving projects."
             });
         });
 };
@@ -62,13 +45,13 @@ exports.findAll = (req, res) => {
 exports.findOne = (req, res) => {
     const id = req.params.id;
 
-    User.findByPk(id)
+    Project.findByPk(id)
         .then(data => {
             res.send(data);
         })
         .catch(err => {
             res.status(500).send({
-                message: "Error retrieving User with id=" + id
+                message: "Error retrieving Project with id=" + id
             });
         });
 };
@@ -76,23 +59,23 @@ exports.findOne = (req, res) => {
 exports.update = (req, res) => {
     const id = req.params.id;
 
-    User.update(req.body, {
+    Project.update(req.body, {
         where: { id: id }
     })
         .then(num => {
             if (num == 1) {
                 res.send({
-                    message: "User was updated successfully."
+                    message: "Project was updated successfully."
                 });
             } else {
                 res.send({
-                    message: `Cannot update User with id=${id}. Maybe User was not found or req.body is empty!`
+                    message: `Cannot update Project with id=${id}. Maybe Project was not found or req.body is empty!`
                 });
             }
         })
         .catch(err => {
             res.status(500).send({
-                message: "Error updating User with id=" + id
+                message: "Error updating Project with id=" + id
             });
         });
 };
@@ -100,23 +83,23 @@ exports.update = (req, res) => {
 exports.delete = (req, res) => {
     const id = req.params.id;
 
-    User.destroy({
+    Project.destroy({
         where: { id: id }
     })
         .then(num => {
             if (num == 1) {
                 res.send({
-                    message: "User was deleted successfully!"
+                    message: "Project was deleted successfully!"
                 });
             } else {
                 res.send({
-                    message: `Cannot delete User with id=${id}. Maybe User was not found!`
+                    message: `Cannot delete Project with id=${id}. Maybe Project was not found!`
                 });
             }
         })
         .catch(err => {
             res.status(500).send({
-                message: "Could not delete User with id=" + id
+                message: "Could not delete Project with id=" + id
             });
         });
 };

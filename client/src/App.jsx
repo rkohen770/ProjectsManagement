@@ -32,8 +32,8 @@ class App extends React.Component {
     if (user) {
       this.setState({
         currentUser: user,
-        showEmployeeBoard: user.roles.includes("ROLE_EMPLOYEE"),
-        showAdminBoard: user.roles.includes("ROLE_ADMIN"),
+        showEmployeeBoard: user.role === "ROLE_EMPLOYEE",
+        showAdminBoard: user.role === "ROLE_ADMIN",
       });
     }
   }
@@ -65,7 +65,7 @@ class App extends React.Component {
 
             {showEmployeeBoard && (
               <li className="nav-item">
-                <Link to={"/mod"} className="nav-link">
+                <Link to={"/emp"} className="nav-link">
                   Employee Board
                 </Link>
               </li>
@@ -126,7 +126,7 @@ class App extends React.Component {
             <Route path="/register" element={<Register />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/user" element={<BoardUser />} />
-            <Route path="/mod" element={<BoardEmployee />} />
+            <Route path="/epm" element={<BoardEmployee />} />
             <Route path="/admin" element={<BoardAdmin />} />
           </Routes>
         </div>

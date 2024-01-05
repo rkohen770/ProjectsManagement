@@ -18,13 +18,14 @@ app.use(express.urlencoded({ extended: true }));
 // routes
 require('../server/routes/auth.routes')(app);
 require('../server/routes/user.routes')(app);
+require('../server/routes/project.routes')(app);
+require('../server/routes/task.routes')(app);
 
 const db = require("../server/models");
 const Role = db.role;
 
-db.sequelize.sync({force: true}).then(() => {
-  console.log('Drop and Resync Db');
-  initial();
+db.sequelize.sync({ force: false }).then(() => {
+  console.log('Resync Db');
 });
 
 // simple route
@@ -47,9 +48,9 @@ function initial() {
  
   Role.create({
     id: 2,
-    name: "moderator"
+    name: "employee"
   });
- 
+
   Role.create({
     id: 3,
     name: "admin"
@@ -105,7 +106,7 @@ function initial() {
 //   username: "mod",
 //   email: "mod@test",
 //   password: "0770",
-//   roles: ["moderator", "user"],
+//   roles: ["employee", "user"],
 // };
 
 // const user = {
@@ -128,7 +129,7 @@ function initial() {
 
 //   Role.create({
 //     id: 2,
-//     name: "moderator",
+//     name: "employee",
 //   });
 
 //   Role.create({

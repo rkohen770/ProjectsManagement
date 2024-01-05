@@ -10,14 +10,29 @@ module.exports = function (app) {
     next();
   });
 
+  // Create a new User
+  app.post("/api/users", controller.create);
+
+  // Retrieve all Users
+  app.get("/api/users", controller.findAll);
+
+  // Retrieve a single User with id
+  app.get("/api/users/:id", controller.findOne);
+
+  // Update a User with id
+  app.put("/api/users/:id", controller.update);
+
+  // Delete a User with id
+  app.delete("/api/users/:id", controller.delete);
+
   app.get("/api/test/all", controller.allAccess);
 
   app.get("/api/test/user", [authJwt.verifyToken], controller.userBoard);
 
   app.get(
-    "/api/test/mod",
-    [authJwt.verifyToken, authJwt.isModerator],
-    controller.moderatorBoard
+    "/api/test/emp",
+    [authJwt.verifyToken, authJwt.isEmployee],
+    controller.employeeBoard
   );
 
   app.get(

@@ -1,11 +1,18 @@
-module.exports = function (app){
-    app.use(function (req, res, next){
-        res.header(
-            "Access-Control-Allow-Headers",
-            "x-access-token, Origin, Content-Type, Accept"
-        );
-        next();
-    });
+const controller = require("../controllers/project.controller");
 
-    app.get()
-}
+module.exports = function (app) {
+  // Create a new Project
+  app.post("/api/projects", controller.create);
+
+  // Retrieve all Projects
+  app.get("/api/projects", controller.findAll);
+
+  // Retrieve a single Project with id
+  app.get("/api/projects/:id", controller.findOne);
+
+  // Update a Project with id
+  app.put("/api/projects/:id", controller.update);
+
+  // Delete a Project with id
+  app.delete("/api/projects/:id", controller.delete);
+};
