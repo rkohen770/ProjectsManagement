@@ -11,7 +11,11 @@ class AuthService {
       })
       .then(response => {
         if (response.data.accessToken) {
-          localStorage.setItem("user", JSON.stringify(response.data));
+          const user = {
+            ...response.data,
+            projects: []
+          }
+          localStorage.setItem("user", JSON.stringify(user));
         }
 
         return response.data;

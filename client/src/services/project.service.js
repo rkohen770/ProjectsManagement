@@ -8,6 +8,11 @@ class ProjectService {
     return axios.get(API_URL, { headers: authHeader() });
   }
 
+  //get all projects by user id
+  getAllProjectsByUserId(id) {
+    return axios.get(API_URL + "user/" + id, { headers: authHeader() });
+  }
+
   getProjectById(id) {
     return axios.get(API_URL + id, { headers: authHeader() });
   }

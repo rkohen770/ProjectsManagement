@@ -7,6 +7,9 @@ module.exports = function (app) {
   // Retrieve all Projects
   app.get("/api/projects", controller.findAll);
 
+  // Retrieve all Projects by user id
+  app.get("/api/projects/user/:id", controller.findAllByUserId);
+
   // Retrieve a single Project with id
   app.get("/api/projects/:id", controller.findOne);
 

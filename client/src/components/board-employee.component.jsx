@@ -1,44 +1,44 @@
-/* eslint-disable no-unused-vars */
-import React, { Component } from "react";
+import React, { useContext, useEffect, useState } from "react";
+import { List, Card } from 'antd'
+import UserService from '../services/user.service'; // Assuming UserService is imported from here
+import AuthService from '../services/auth.service';
+import { UserContext } from '../context/user.context';
 
-import UserService from "../services/user.service";
+export function BoardEmployee() {
+  const { user: initialUser } = useContext(UserContext);
 
-export default class boardEmployee extends Component {
-  constructor(props) {
-    super(props);
+  const [redirect, setRedirect] = useState(null);
+  const [userReady, setUserReady] = useState(false);
+  const [currentUser, setCurrentUser] = useState(initialUser);
 
-    this.state = {
-      content: ""
-    };
-  }
+  useEffect(() => {
+    const currentUser = AuthService.getCurrentUser();
 
-  componentDidMount() {
-    UserService.getEmployeeBoard().then(
-      response => {
-        this.setState({
-          content: response.data
-        });
-      },
-      error => {
-        this.setState({
-          content:
-            (error.response &&
-              error.response.data &&
-              error.response.data.message) ||
-            error.message ||
-            error.toString()
-        });
-      }
-    );
-  }
+    if (!currentUser) setRedirect("/home");
+    setCurrentUser(currentUser);
+    setUserReady(true);
 
-  render() {
-    return (
-      <div className="container">
-        <header className="jumbotron">
-          <h3>{this.state.content}</h3>
-        </header>
-      </div>
-    );
-  }
+  }, []);
+
+
+
+  return (
+    <div className="container">
+      <header className="jumbotron">
+        <h3>{currentUser.username} is an Employee User</h3>
+      </header>
+      <List
+        dataSource={currentUser.projects}
+        grid={{ gutter: 200, sm: 1, md: 2, lg: 3, xl: 4, xxl: 5 }}
+        renderItem={project => (
+          <List.Item>
+            <Card title={project.title} bordered={false}>
+              <p>{project.name}</p>
+            </Card>
+          </List.Item>
+        )}
+      >
+      </List>
+    </div>
+  );
 }
