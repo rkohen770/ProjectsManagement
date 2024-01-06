@@ -1,58 +1,43 @@
 /* eslint-disable no-unused-vars */
-import React, { Component } from "react";
+import React, { useState, useEffect, useContext, createContext } from "react";
 import { Navigate } from "react-router-dom";
+import { Card, List } from "antd";
 import AuthService from "../services/auth.service";
+import { UserContext } from "../context/user.context";
+export function Profile() {
 
-export default class Profile extends Component {
-  constructor(props) {
-    super(props);
+  const { user: initialUser } = useContext(UserContext);
 
-    this.state = {
-      redirect: null,
-      userReady: false,
-      currentUser: { username: "" }
-    };
-  }
+  const [redirect, setRedirect] = useState(null);
+  const [userReady, setUserReady] = useState(false);
+  const [currentUser, setCurrentUser] = useState(initialUser);
 
-  componentDidMount() {
+
+  useEffect(() => {
     const currentUser = AuthService.getCurrentUser();
 
-    if (!currentUser) this.setState({ redirect: "/home" });
-    this.setState({ currentUser: currentUser, userReady: true })
+    if (!currentUser) setRedirect("/home");
+    setCurrentUser(currentUser);
+    setUserReady(true);
+
+  }, []);
+
+  if (redirect) {
+    return <Navigate to={redirect} />
   }
 
-  render() {
-    if (this.state.redirect) {
-      return <Navigate to={this.state.redirect} />
-    }
-
-    const { currentUser } = this.state;
-
-    return (
+  return (
+    <UserContext.Provider value={{ currentUser, setCurrentUser }}>
       <div className="container">
-        {(this.state.userReady) ?
-        <div>
-        <header className="jumbotron">
-          <h3>
-            <strong>{currentUser.username}</strong> Profile
-          </h3>
-        </header>
-        <p>
-          <strong>Token:</strong>{" "}
-          {currentUser.accessToken.substring(0, 20)} ...{" "}
-          {currentUser.accessToken.substr(currentUser.accessToken.length - 20)}
-        </p>
-        <p>
-          <strong>Id:</strong>{" "}
-          {currentUser.id}
-        </p>
-        <p>
-          <strong>Email:</strong>{" "}
-          {currentUser.email}
-        </p>
-        <strong>Authorities:</strong>
-      </div>: null}
+        {userReady ?
+          <div>
+            <header className="jumbotron">
+              <h3>
+                <strong>{currentUser.username}</strong> Profile
+              </h3>
+            </header>
+          </div> : null}
       </div>
-    );
-  }
+    </UserContext.Provider>
+  );
 }

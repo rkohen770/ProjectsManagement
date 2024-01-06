@@ -1,44 +1,29 @@
-/* eslint-disable no-unused-vars */
-import React, { Component } from "react";
-
+import { useState, useEffect } from "react";
 import UserService from "../services/user.service";
 
-export default class BoardUser extends Component {
-  constructor(props) {
-    super(props);
+export function BoardUser() {
+  const [content, setContent] = useState("");
 
-    this.state = {
-      content: ""
-    };
-  }
-
-  componentDidMount() {
+  useEffect(() => {
     UserService.getUserBoard().then(
       response => {
-        this.setState({
-          content: response.data
-        });
+        setContent(response.data);
       },
       error => {
-        this.setState({
-          content:
-            (error.response &&
-              error.response.data &&
-              error.response.data.message) ||
-            error.message ||
-            error.toString()
-        });
+        setContent(
+          (error.response && error.response.data) ||
+          error.message ||
+          error.toString()
+        );
       }
     );
-  }
+  }, []);
 
-  render() {
-    return (
-      <div className="container">
-        <header className="jumbotron">
-          <h3>{this.state.content}</h3>
-        </header>
-      </div>
-    );
-  }
+  return (
+    <div className="container">
+      <header className="jumbotron">
+        <h3>{content}</h3>
+      </header>
+    </div>
+  );
 }

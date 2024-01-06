@@ -4,8 +4,8 @@ import authHeader from './auth-header';
 const API_URL = 'http://localhost:8080/api/tasks/';
 
 class TaskService {
-  getAllTasks() {
-    return axios.get(API_URL, { headers: authHeader() });
+  getAllTasks(projectId) {
+    return axios.get(API_URL + projectId, { headers: authHeader() });
   }
 
   getTaskById(id) {

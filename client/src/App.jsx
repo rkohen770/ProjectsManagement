@@ -8,11 +8,11 @@ import AuthService from "./services/auth.service";
 
 import Login from "./components/login.component";
 import Register from "./components/register.component";
-import Home from "./components/home.component";
-import Profile from "./components/profile.component";
-import BoardUser from "./components/board-user.component";
-import BoardEmployee from "./components/board-employee.component";
-import BoardAdmin from "./components/board-admin.component";
+import { Home } from "./components/home.component";
+import { Profile } from "./components/profile.component";
+import { BoardUser } from "./components/board-user.component";
+import { BoardEmployee } from "./components/board-employee.component";
+import { BoardAdmin } from "./components/admin/board-admin.component";
 
 class App extends React.Component {
   constructor(props) {
@@ -65,7 +65,7 @@ class App extends React.Component {
 
             {showEmployeeBoard && (
               <li className="nav-item">
-                <Link to={"/emp"} className="nav-link">
+                <Link to={"/employee"} className="nav-link">
                   Employee Board
                 </Link>
               </li>
@@ -91,9 +91,15 @@ class App extends React.Component {
           {currentUser ? (
             <div className="navbar-nav ml-auto">
               <li className="nav-item">
-                <Link to={"/profile"} className="nav-link">
+                {(currentUser.role === "employee") ? (
+                <Link to={"/employee"} className="nav-link">
                   {currentUser.username}
                 </Link>
+                ) : (
+                <Link to={"/admin"} className="nav-link">
+                  {currentUser.username}
+                </Link>
+                )}
               </li>
               <li className="nav-item">
                 <a href="/login" className="nav-link" onClick={this.logOut}>
@@ -126,7 +132,7 @@ class App extends React.Component {
             <Route path="/register" element={<Register />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/user" element={<BoardUser />} />
-            <Route path="/epm" element={<BoardEmployee />} />
+            <Route path="/employee" element={<BoardEmployee />} />
             <Route path="/admin" element={<BoardAdmin />} />
           </Routes>
         </div>

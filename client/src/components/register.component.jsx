@@ -1,9 +1,7 @@
-/* eslint-disable no-unused-vars */
-import React, { Component } from "react";
+import { useState, useRef } from "react";
 import Form from "react-validation/build/form";
 import Input from "react-validation/build/input";
 import CheckButton from "react-validation/build/button";
-import { isEmail } from "validator";
 
 import AuthService from "../services/auth.service";
 
@@ -17,108 +15,58 @@ const required = value => {
   }
 };
 
-const email = value => {
-  if (!isEmail(value)) {
-    return (
-      <div className="alert alert-danger" role="alert">
-        This is not a valid email.
-      </div>
-    );
-  }
-};
+export function Register() {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [checkboxRole, setCheckboxRole] = useState("employee");
+  const [successful, setSuccessful] = useState(false);
+  const [message, setMessage] = useState("");
 
-const vusername = value => {
-  if (value.length < 3 || value.length > 20) {
-    return (
-      <div className="alert alert-danger" role="alert">
-        The username must be between 3 and 20 characters.
-      </div>
-    );
-  }
-};
+  const form = useRef();
+  const checkBtn = useRef();
 
-const vpassword = value => {
-  if (value.length < 6 || value.length > 40) {
-    return (
-      <div className="alert alert-danger" role="alert">
-        The password must be between 6 and 40 characters.
-      </div>
-    );
-  }
-};
-
-export default class Register extends Component {
-  constructor(props) {
-    super(props);
-    this.handleRegister = this.handleRegister.bind(this);
-    this.onChangeUsername = this.onChangeUsername.bind(this);
-    this.onChangeEmail = this.onChangeEmail.bind(this);
-    this.onChangePassword = this.onChangePassword.bind(this);
-    this.onChangeCheckboxRole = this.onChangeCheckboxRole.bind(this);
-    
-
-    this.state = {
-      username: "",
-      email: "",
-      password: "",
-      checkboxRole: "employee",
-      successful: false,
-      message: "",
-      firstName: "",
-      lastName: "",
-    };
+  const onChangeFirstName = (e) => {
+    setFirstName(e.target.value);
   }
 
-  onChangeUsername(e) {
-    this.setState({
-      username: e.target.value
-    });
+  const onChangeLastName = (e) => {
+    setLastName(e.target.value);
   }
 
-  onChangeEmail(e) {
-    this.setState({
-      email: e.target.value
-    });
+  const onChangeEmail = (e) => {
+    setEmail(e.target.value);
   }
 
-  onChangePassword(e) {
-    this.setState({
-      password: e.target.value
-    });
+  const onChangePassword = (e) => {
+    setPassword(e.target.value);
   }
 
-  onChangeCheckboxRole(e) {
-    this.setState({
-      checkboxRole: e.target.value
-    });
-
+  const onChangeCheckboxRole = (e) => {
+    setCheckboxRole(e.target.value);
   }
 
-  handleRegister(e) {
+  const handleRegister = (e) => {
     e.preventDefault();
 
-    this.setState({
-      message: "",
-      successful: false
-    });
+    setMessage("");
+    setSuccessful(false);
 
-    this.form.validateAll();
+    form.current.validateAll();
 
-    if (this.checkBtn.context._errors.length === 0) {
+    if (checkBtn.current.context._errors.length === 0) {
       AuthService.register(
-        this.state.username,
-        this.state.email,
-        this.state.password,
-        this.state.checkboxRole,
-        this.state.firstName,
-        this.state.lastName,
-
+        `${firstName} ${lastName}`,
+        email,
+        password,
+        checkboxRole,
+        firstName,
+        lastName,
       ).then(
         response => {
-          this.setState({
-            message: response.data.message,
-            successful: true
-          });
+          setMessage(response.data.message);
+          setSuccessful(true);
         },
         error => {
           const resMessage =
@@ -128,105 +76,110 @@ export default class Register extends Component {
             error.message ||
             error.toString();
 
-          this.setState({
-            successful: false,
-            message: resMessage
-          });
+          setSuccessful(false);
+          setMessage(resMessage);
         }
       );
     }
   }
 
-  render() {
-    return (
-      <div className="col-md-12">
-        <div className="card card-container">
-          <img
-            src="//ssl.gstatic.com/accounts/ui/avatar_2x.png"
-            alt="profile-img"
-            className="profile-img-card"
-          />
+  return (
+    <div className="col-md-12">
+      <div className="card card-container">
+        <img
+          src="//ssl.gstatic.com/accounts/ui/avatar_2x.png"
+          alt="profile-img"
+          className="profile-img-card"
+        />
 
-          <Form
-            onSubmit={this.handleRegister}
-            ref={c => {
-              this.form = c;
-            }}
-          >
-            {!this.state.successful && (
-              <div>
-                <div className="form-group">
-                <label htmlFor="checkboxRole">Role</label>
-                <select className="form-control" id="checkboxRole" name="checkboxRole" value={this.state.checkboxRole} onChange={this.onChangeCheckboxRole}>
-                  <option value="user">employee</option>
-                  <option value="admin">admin</option>
-                </select>
-                </div>
-                <div className="form-group">
-                  <label htmlFor="username">Username</label>
-                  <Input
-                    type="text"
-                    className="form-control"
-                    name="username"
-                    value={this.state.username}
-                    onChange={this.onChangeUsername}
-                    validations={[required, vusername]}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="email">Email</label>
-                  <Input
-                    type="text"
-                    className="form-control"
-                    name="email"
-                    value={this.state.email}
-                    onChange={this.onChangeEmail}
-                    validations={[required, email]}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="password">Password</label>
-                  <Input
-                    type="password"
-                    className="form-control"
-                    name="password"
-                    value={this.state.password}
-                    onChange={this.onChangePassword}
-                    validations={[required, vpassword]}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <button className="btn btn-primary btn-block">Sign Up</button>
-                </div>
-              </div>
-            )}
-
-            {this.state.message && (
+        <Form
+          onSubmit={handleRegister}
+          ref={form}
+        >
+          {!successful && (
+            <div>
               <div className="form-group">
-                <div
-                  className={
-                    this.state.successful
-                      ? "alert alert-success"
-                      : "alert alert-danger"
-                  }
-                  role="alert"
-                >
-                  {this.state.message}
-                </div>
+              <label htmlFor="checkboxRole">Role</label>
+              <select className="form-control" id="checkboxRole" name="checkboxRole" value={checkboxRole} onChange={onChangeCheckboxRole}>
+                <option value="user">employee</option>
+                <option value="admin">admin</option>
+              </select>
               </div>
-            )}
-            <CheckButton
-              style={{ display: "none" }}
-              ref={c => {
-                this.checkBtn = c;
-              }}
-            />
-          </Form>
-        </div>
+              <div className="form-group">
+                <label htmlFor="firstName">FirstName</label>
+                <Input
+                  type="text"
+                  className="form-control"
+                  name="firstName"
+                  value={firstName}
+                  onChange={onChangeFirstName}
+                  validations={[required]}
+                />                  
+              </div>
+              <div className="form-group">
+                <label htmlFor="lastName">LastName</label>
+                <Input
+                  type="text"
+                  className="form-control"
+                  name="lastName"
+                  value={lastName}
+                  onChange={onChangeLastName}
+                  validations={[required]}
+                />                  
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="email">Email</label>
+                <Input
+                  type="text"
+                  className="form-control"
+                  name="email"
+                  value={email}
+                  onChange={onChangeEmail}
+                  validations={[required]}
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="password">Password</label>
+                <Input
+                  type="password"
+                  className="form-control"
+                  name="password"
+                  value={password}
+                  onChange={onChangePassword}
+                  validations={[required]}
+                />
+              </div>
+
+              <div className="form-group">
+                <button className="btn btn-primary btn-block">Sign Up</button>
+              </div>
+            </div>
+          )}
+
+          {message && (
+            <div className="form-group">
+              <div
+                className={
+                  successful
+                    ? "alert alert-success"
+                    : "alert alert-danger"
+                }
+                role="alert"
+              >
+                {message}
+              </div>
+            </div>
+          )}
+          <CheckButton
+            style={{ display: "none" }}
+            ref={checkBtn}
+          />
+        </Form>
       </div>
-    );
-  }
+    </div>
+  );
 }
+
+export default Register;
