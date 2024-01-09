@@ -18,7 +18,7 @@ exports.employeeBoard = (req, res) => {
 
 exports.create = (req, res) => {
     // Validate request
-    if (!req.body.username) {
+    if (!req.body.userName) {
         res.status(400).send({
             message: "Content can not be empty!"
         });
@@ -27,12 +27,13 @@ exports.create = (req, res) => {
 
     // Create a User
     const user = {
-        username: req.body.username,
+        userName: req.body.userName,
         email: req.body.email,
         password: req.body.password,
         role: req.body.role,
         firstName: req.body.firstName,
-        lastName: req.body.lastName
+        lastName: req.body.lastName,
+        avatar: req.body.avatar
     };
 
     // Save User in the database

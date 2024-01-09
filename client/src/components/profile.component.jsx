@@ -33,7 +33,7 @@ export function Profile() {
           <div>
             <header className="jumbotron">
               <h3>
-                <strong>{currentUser.username}</strong> Profile
+                <strong>{currentUser.userName}</strong> Profile
               </h3>
             </header>
           </div> : null}

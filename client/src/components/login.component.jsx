@@ -18,7 +18,7 @@ const required = value => {
 };
 
 export function Login() {
-  const [username, setUsername] = useState("");
+  const [userName, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -43,14 +43,14 @@ export function Login() {
     form.current.validateAll();
 
     if (checkBtn.current.context._errors.length === 0) {
-      AuthService.login(username, password).then(
+      AuthService.login(userName, password).then(
         () => {
           if (AuthService.getCurrentUser().role === "employee") {
             window.location.href = "/employee";
           } else {
             window.location.href = "/admin";
           }
-          
+
         },
         error => {
           const resMessage =
@@ -83,12 +83,12 @@ export function Login() {
           ref={form}
         >
           <div className="form-group">
-            <label htmlFor="username">Username</label>
+            <label htmlFor="userName">Username</label>
             <Input
               type="text"
               className="form-control"
-              name="username"
-              value={username}
+              name="userName"
+              value={userName}
               onChange={onChangeUsername}
               validations={[required]}
             />

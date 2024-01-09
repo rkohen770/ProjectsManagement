@@ -14,14 +14,19 @@ exports.create = (req, res) => {
     const project = {
         name: req.body.name,
         description: req.body.description,
-        deadline: req.body.deadline,
+        deadLine: req.body.deadLine,
         managerId: req.body.managerId
     };
 
     // Save Project in the database
     Project.create(project)
         .then(data => {
-            res.send(data);
+            if(data.dataValues){
+                res.status(200).send({
+                    message: "Project was created successfully.",
+                    data: data
+                });
+            }
         })
         .catch(err => {
             res.status(500).send({
