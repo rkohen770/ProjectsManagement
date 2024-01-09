@@ -1,23 +1,19 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { List, Card, Radio, Space, Tabs } from 'antd'
+import { Outlet, useNavigate } from 'react-router-dom';
+import { Menu } from 'antd'
 import AuthService from '../../services/auth.service';
-import { AdminHome } from './admin-home.component';
-import { AdminProjects } from './admin-projects.component';
-import { AdminUsers } from './admin-users.component';
 import {
   HomeOutlined,
   TeamOutlined,
   FolderOutlined,
 } from '@ant-design/icons'
-import UserService from '../../services/user.service'; // Assuming UserService is imported from here
 import { UserContext } from '../../context/user.context';
-function getItem(label, key, icon, children) {
+function getItem(label, key, icon) {
   return {
     key,
     icon,
     label,
-    children,
-  }
+  };
 }
 export function BoardAdmin() {
   const { user: initialUser } = useContext(UserContext);
@@ -26,10 +22,12 @@ export function BoardAdmin() {
   const [userReady, setUserReady] = useState(false);
   const [currentUser, setCurrentUser] = useState(initialUser);
 
+  const navigate = useNavigate();
+
   const items = [
-    getItem('Home', 'home', <HomeOutlined />, <AdminHome />),
-    getItem('Projects', 'projects', <FolderOutlined />, <AdminProjects />),
-    getItem('Users', 'users', <TeamOutlined />, <AdminUsers />),
+    getItem('Home', 'home', <HomeOutlined />),
+    getItem('Projects', 'projects', <FolderOutlined />),
+    getItem('Users', 'users', <TeamOutlined />),
   ];
 
 
@@ -42,13 +40,40 @@ export function BoardAdmin() {
 
   }, []);
 
+  const onSelect = (item) => {
+    switch (item.key) {
+      case 'home':
+        navigate('/admin/home');
+        break;
+      case 'projects':
+        navigate('/admin/projects');
+        break;
+      case 'users':
+        navigate('/admin/users');
+        break;
+      default:
+        break;
+    }
+  }
+
 
   return (
-    <div className="container">
+    <div >
       <header >
-        <h3>{currentUser.username} is an Admin User</h3>
+        <h3>{currentUser.userName} is an Admin User</h3>
       </header>
-      <Tabs tabPosition='left' items={items} />
+      <div style={{ display: 'flex', flexDirection: 'row', width: '100%', justifyContent: 'start' }}>
+        <Menu
+          style={{
+            width: 256,
+          }}
+          defaultSelectedKeys={['1']}
+          mode="inline"
+          items={items}
+          onSelect={onSelect}
+        />
+        <Outlet />
+      </div>
     </div>
   );
 }

@@ -2,7 +2,8 @@ import { useState, useRef } from "react";
 import Form from "react-validation/build/form";
 import Input from "react-validation/build/input";
 import CheckButton from "react-validation/build/button";
-
+import { Upload, message as msg} from "antd";
+import { UploadOutlined } from "@ant-design/icons";
 import AuthService from "../services/auth.service";
 
 const required = value => {
@@ -20,9 +21,12 @@ export function Register() {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [avatar, setAvatar] = useState("");
   const [checkboxRole, setCheckboxRole] = useState("employee");
   const [successful, setSuccessful] = useState(false);
   const [message, setMessage] = useState("");
+
+  const imagesUrl = "http://localhost:8080/api/auth/images";
 
   const form = useRef();
   const checkBtn = useRef();
@@ -63,6 +67,7 @@ export function Register() {
         checkboxRole,
         firstName,
         lastName,
+        avatar,
       ).then(
         response => {
           setMessage(response.data.message);
@@ -83,6 +88,39 @@ export function Register() {
     }
   }
 
+  const props = {
+    action: imagesUrl,
+    beforeUpload: (file) => {
+      const isValidImageFormat =
+        //check if file is an image
+        file.type === 'image/png' ||
+        file.type === 'image/jpeg' ||
+        file.type === 'image/jpg'
+      if (!isValidImageFormat) {
+        msg.error(
+          `${file.name} this is not a supported format, please upload a png, jpeg or jpg file`
+        )
+        return Upload.LIST_IGNORE
+      }
+    },
+    listType: 'picture-circle',
+    maxCount: 1,
+    accept: '.png,.jpeg,.jpg',
+    onChange(info) {
+      const { status } = info.file;
+      if (status !== 'uploading') {
+        console.log(info.file, info.fileList);
+        //TODO: S3
+        setAvatar (info.file.name)
+      }
+      if (status === 'done') {
+        msg.success(`${info.file.name} file uploaded successfully.`);
+      } else if (status === 'error') {
+        msg.error(`${info.file.name} file upload failed.`);
+      }
+    },
+  }
+
   return (
     <div className="col-md-12">
       <div className="card card-container">
@@ -99,11 +137,11 @@ export function Register() {
           {!successful && (
             <div>
               <div className="form-group">
-              <label htmlFor="checkboxRole">Role</label>
-              <select className="form-control" id="checkboxRole" name="checkboxRole" value={checkboxRole} onChange={onChangeCheckboxRole}>
-                <option value="user">employee</option>
-                <option value="admin">admin</option>
-              </select>
+                <label htmlFor="checkboxRole">Role</label>
+                <select className="form-control" id="checkboxRole" name="checkboxRole" value={checkboxRole} onChange={onChangeCheckboxRole}>
+                  <option value="user">employee</option>
+                  <option value="admin">admin</option>
+                </select>
               </div>
               <div className="form-group">
                 <label htmlFor="firstName">FirstName</label>
@@ -114,7 +152,7 @@ export function Register() {
                   value={firstName}
                   onChange={onChangeFirstName}
                   validations={[required]}
-                />                  
+                />
               </div>
               <div className="form-group">
                 <label htmlFor="lastName">LastName</label>
@@ -125,7 +163,7 @@ export function Register() {
                   value={lastName}
                   onChange={onChangeLastName}
                   validations={[required]}
-                />                  
+                />
               </div>
 
               <div className="form-group">
@@ -150,6 +188,17 @@ export function Register() {
                   onChange={onChangePassword}
                   validations={[required]}
                 />
+              </div>
+
+
+              <div className="form-group">
+                <label htmlFor="avatar">Avatar</label>
+                <Upload.Dragger {...props} name="avatar">
+                  <div>
+                    <UploadOutlined />
+                    <div style={{ marginTop: 8 }}>drop here</div>
+                  </div>
+                </Upload.Dragger>
               </div>
 
               <div className="form-group">

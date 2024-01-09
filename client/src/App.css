@@ -30,3 +30,32 @@ label {
   -webkit-border-radius: 50%;
   border-radius: 50%;
 }
+
+.container {
+  margin-left: 10px;
+  margin-right: 10px;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+
+.jumbotron{
+  padding: 2rem 1rem;
+}
+
+.footer-jumbotron{
+  display: grid;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  grid-template-columns: 2fr 3fr;
+  padding-right: 10px;
+}
+
+.task-board{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+

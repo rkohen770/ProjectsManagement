@@ -15,7 +15,7 @@ exports.create = (req, res) => {
         name: req.body.name,
         description: req.body.description,
         status: req.body.status,
-        deadline: req.body.deadline,
+        deadLine: req.body.deadLine,
         employeeId: req.body.employeeId,
         projectId: req.body.projectId
     };

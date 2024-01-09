@@ -2,12 +2,13 @@
 import { createContext } from 'react';
 
 const user={
-    username: "default user",
+    userName: "default user",
     email: "default@gmail.com",
     password:"000000",
     role:"user",
     firstName:"default",
     lastName:"user",
+    avatar: "",
     projects:[],
 }
 

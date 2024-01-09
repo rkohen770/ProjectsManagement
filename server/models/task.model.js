@@ -15,19 +15,31 @@ module.exports = (sequelize, Sequelize) => {
                 isIn: [['todo', 'in-progress', 'done']]
             }
         },
-        deadline: {
+        deadLine: {
             type: Sequelize.DATE
+        },
+        employeeId: {
+            type: Sequelize.INTEGER,
+            allowNull: false
+        },
+        projectId: {
+            type: Sequelize.INTEGER,
+            allowNull: false
         }
     });
 
     Task.associate = models => {
         Task.belongsTo(models.User, {
             foreignKey: 'employeeId',
-            as: 'employee'
+            as: 'employee',
+            onDelete: 'NO ACTION',
+            onUpdate: 'NO ACTION' 
         });
         Task.belongsTo(models.Project, {
             foreignKey: 'projectId',
-            as: 'project'
+            as: 'project',
+            onDelete: 'NO ACTION',
+            onUpdate: 'NO ACTION' 
         });
     };
 
