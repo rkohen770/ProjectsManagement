@@ -1,29 +1,23 @@
 import React, { useContext, useState, useEffect } from "react";
-import { Navigate, Link, useNavigate, Outlet } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { List, Card, Modal, Button, message, Tooltip, Popconfirm } from "antd";
-import { PlusOutlined, EditOutlined, DeleteOutlined, HomeOutlined, FolderOutlined } from "@ant-design/icons";
+import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import dayjs from 'dayjs';
 
 
-import { UserContext } from "../../context/user.context";
 import { ProjectForm } from "./project-form.component";
 import { TaskForm } from "./task-form.component";
 import ProjectService from "../../services/project.service";
 import { ProjectContext } from "../../context/project.contex";
 
 export function AdminProjects() {
-  const { user, setUser } = useContext(UserContext);
-
   const [addProjectDialogIsOpen, setAddProjectDialogIsOpen] = useState(false);
   const [updateProjectDialogIsOpen, setUpdateProjectDialogIsOpen] = useState(false);
   const [addTaskDialogIsOpen, setAddTaskDialogIsOpen] = useState(false);
   const [projects, setProjects] = useState([])
   const [selectedProject, setSelectedProject] = useState(null);
-  const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
-
-
 
   const fetchData = async () => {
     const response = await ProjectService.getAllProjects();
@@ -67,7 +61,6 @@ export function AdminProjects() {
   }
   useEffect(() => {
     fetchData();
-    setLoading(false);
   }, [])
 
   const cancel = () => {
@@ -81,11 +74,12 @@ export function AdminProjects() {
         </header>
         <List
           dataSource={projects}
-          grid={{ gutter: 20, xs: 1,sm: 2,md: 4,lg: 4}}
+          grid={{ gutter: 20, sm: 1,md: 2,lg: 3}}
           renderItem={project => (
             <List.Item >
               <ProjectContext.Provider value={{ project }}>
-                <Card  title={project.name} hoverable bordered={false} onClick={() => handleSelectProject(project)}
+                <Card  title={project.name} size="small" hoverable bordered={false} onClick={() => handleSelectProject(project)}
+                style={{ width: 300 }}
                   actions={[
                     <Tooltip title="Delete project" color="magenta" key={'delete'} >
                       <Popconfirm title="Delete the project?"
@@ -105,7 +99,6 @@ export function AdminProjects() {
                       <EditOutlined key="edit" onClick={(e) => { e.stopPropagation(); handleEditProject(project) }} />
                     </Tooltip>
                   ]} >
-                    {/* show only 2 line from tha desciption */}
                     <Card.Meta description={project.description} style={{ height: '50px', overflow: 'hidden' }} />
                     <Card.Meta description={dayjs(project.deadLine).format('DD/MM/YYYY')} style={{ height: '50px', overflow: 'hidden' }} />
                 </Card>

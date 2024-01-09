@@ -3,10 +3,11 @@ import { useLocation, useNavigate } from "react-router-dom";
 import PropTypes from 'prop-types';
 import { Document, Page } from 'react-pdf';
 import dayjs from 'dayjs';
-import { Button, Descriptions, List, Card, Tooltip, Popconfirm, message, Tag, Progress, ConfigProvider } from "antd";
-import { RollbackOutlined, ArrowLeftOutlined, ArrowRightOutlined } from "@ant-design/icons";
+import { Button, Descriptions, List, Card, Tooltip, Popconfirm, message, Tag, Progress, ConfigProvider, Space } from "antd";
+import { RollbackOutlined, ArrowLeftOutlined, ArrowRightOutlined, DeleteOutlined } from "@ant-design/icons";
 
 import TaskService from '../../services/task.service';
+import authService from "../../services/auth.service";
 
 
 export function BoardProject() {
@@ -24,7 +25,7 @@ export function BoardProject() {
       try {
         const project = location.state.project;
         setProject(project);
-        const user = location.state.user;
+        const user = authService.getCurrentUser();
         setUser(user);
 
         let projectTasks = [];
@@ -75,10 +76,15 @@ export function BoardProject() {
 
   function TaskCard(props) {
     const task = props.item;
+    const hasPremission = !user || user.role === 'admin' || user.id === task.employeeId;
     return (
-      <Card title={task.name} hoverable bordered={false}
-        actions={actions(task)} >
+      <Card title={task.name} hoverable={hasPremission} bordered={false}
+        style={{ opacity: hasPremission ? 1 : 0.5 }}
+        size="small"
+        actions={hasPremission ? actions(task) : []} >
         <Descriptions
+          column={2}
+          layout="vertical"
           items={[
             {
               label: 'Description',
@@ -86,7 +92,7 @@ export function BoardProject() {
             },
             {
               label: 'Deadline',
-              children: dayjs(task.deadline).format('DD/MM/YYYY'),
+              children: dayjs(task.deadLine).format('DD/MM/YYYY'),
             },
           ]} />
       </Card>
@@ -149,6 +155,22 @@ export function BoardProject() {
         </Tooltip>,
       )
     }
+
+    if (user && user.role === 'admin') {
+      actions.splice(1, 0,
+        <Tooltip title="Delete task" color="magenta" key={'delete'} >
+          <Popconfirm title="Delete the task?"
+            description="Are you sure to delete this task?"
+            onConfirm={() => handleDelete(task)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <DeleteOutlined key="delete" />
+          </Popconfirm>
+        </Tooltip>,
+      )
+    }
+
     return actions;
   }
 
@@ -220,15 +242,49 @@ export function BoardProject() {
     }
   }
 
+  async function handleDelete(task) {
+    try {
+      const response = await TaskService.deleteTask(task.id);
+      if (response.status === 200) {
+        message.success('the task has been deleted successfully!')
+        switch (task.status) {
+          case 'todo':
+            setTasksTodo(tasksTodo.filter(t => t.id !== task.id));
+            break;
+          case 'in-progress':
+            setTasksInProgress(tasksInProgress.filter(t => t.id !== task.id));
+            break;
+          case 'done':
+            setTasksDone(tasksDone.filter(t => t.id !== task.id));
+            break;
+          default:
+            break;
+        }
+      } else {
+        message.error(response.message)
+      }
+    } catch (error) {
+      console.log(error)
+      message.error('an error has occurred while you were trying to delete the task')
+    }
+  }
+
   return (
     <div className="container">
-      <header style={{ display: "flex", justifyContent: "space-between" }}>
-        <h3> {project ? project.name : ""} </h3>
-        <Button icon={<RollbackOutlined />} onClick={() => navigate('../projects')} >Go back</Button>
-      </header>
       <div className="jumbotron" >
-        <h4>Project Description</h4>
-        <p>{project ? project.description : ""}</p>
+        <div className="header-jumbotron">
+          <header style={{ display: "flex", justifyContent: "space-between"}}>
+            <h2> {project ? project.name : ""} </h2>
+            <Button icon={<RollbackOutlined />} onClick={() => navigate('../projects')} >Go back</Button>
+          </header>
+          <Descriptions
+            items={[
+              {
+                label: 'Description',
+                children: project ? project.description : "",
+              }
+            ]} />
+        </div>
         <div className="footer-jumbotron">
           <div>
             <Descriptions
@@ -240,34 +296,34 @@ export function BoardProject() {
             <Button type="link" onClick={() => { }}>View Document</Button>
           </div>
           <ConfigProvider
-              theme={{
-                components: {
-                  Progress: {
-                    defaultColor: '#91caff',
-                    remainingColor: '#ffccc7',
-                  },
+            theme={{
+              components: {
+                Progress: {
+                  defaultColor: '#91caff',
+                  remainingColor: '#ffccc7',
                 },
-              }}
-            >
-          <Tooltip title= {`${tasksDone.length} done | ${tasksInProgress.length} in progress | ${tasksTodo.length} todo` } color="lime">
+              },
+            }}
+          >
+            <Tooltip title={`${tasksDone.length} done | ${tasksInProgress.length} in progress | ${tasksTodo.length} todo`} color="lime">
               <Progress
-                percent={ (tasksDone.length + tasksInProgress.length + tasksTodo.length) === 0 ? 0 :
-                  ((tasksDone.length + tasksInProgress.length)/ 
-                (tasksDone.length + tasksInProgress.length + tasksTodo.length) * 100).toFixed(2)}
+                percent={(tasksDone.length + tasksInProgress.length + tasksTodo.length) === 0 ? 0 :
+                  ((tasksDone.length + tasksInProgress.length) /
+                    (tasksDone.length + tasksInProgress.length + tasksTodo.length) * 100).toFixed(2)}
                 success={{
                   percent: (tasksDone.length / (tasksDone.length + tasksInProgress.length + tasksTodo.length) * 100),
                   strokeColor: '#b7eb8f',
                 }}
               />
-          </Tooltip>
+            </Tooltip>
           </ConfigProvider>
 
         </div>
       </div>
       <div className="task-board">
-        <Tag color="error"><TaskCardList data={tasksTodo} title="Todo List" /></Tag>
-        <Tag color="processing"> <TaskCardList data={tasksInProgress} title="In Progress List" /></Tag>
-        <Tag color="success"><TaskCardList data={tasksDone} title="Done List" /></Tag>
+        <Tag className="tag" color="error"><TaskCardList data={tasksTodo} title="Todo List" /></Tag>
+        <Tag className="tag" color="processing"> <TaskCardList data={tasksInProgress} title="In Progress List" /></Tag>
+        <Tag className="tag" color="success"><TaskCardList data={tasksDone} title="Done List" /></Tag>
       </div>
     </div>
   );
