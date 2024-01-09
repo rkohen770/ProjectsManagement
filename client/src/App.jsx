@@ -10,9 +10,16 @@ import Login from "./components/login.component";
 import Register from "./components/register.component";
 import { Home } from "./components/home.component";
 import { Profile } from "./components/profile.component";
+import { BoardProject } from "./components/common/board-project.component";
 import { BoardUser } from "./components/board-user.component";
-import { BoardEmployee } from "./components/board-employee.component";
+import { BoardEmployee } from "./components/employee/board-employee.component";
+import { EmployeeHome } from "./components/employee/employee-home.component";
+import { EmployeeProjects } from "./components/employee/employee-projects.component";
 import { BoardAdmin } from "./components/admin/board-admin.component";
+import { AdminUsers } from "./components/admin/admin-users.component";
+import { AdminHome } from "./components/admin/admin-home.component";
+import { Avatar } from "antd";
+import { AdminProjects } from "./components/admin/admin-projects.component";
 
 class App extends React.Component {
   constructor(props) {
@@ -32,8 +39,8 @@ class App extends React.Component {
     if (user) {
       this.setState({
         currentUser: user,
-        showEmployeeBoard: user.role === "ROLE_EMPLOYEE",
-        showAdminBoard: user.role === "ROLE_ADMIN",
+        showEmployeeBoard: user.role === "employee", // "employee
+        showAdminBoard: user.role === "admin", // "admin"
       });
     }
   }
@@ -48,57 +55,47 @@ class App extends React.Component {
   }
 
   render() {
-    const { currentUser, showEmployeeBoard, showAdminBoard } = this.state;
+    const { currentUser } = this.state;
 
     return (
-      <div>
+      <div style={{height: '100%'}}>
         <nav className="navbar navbar-expand navbar-dark bg-dark">
-          <Link to={"/"} className="navbar-brand">
-            bezKoder
-          </Link>
+          < div className="navbar-brand">
+            {currentUser ? (
+              (currentUser.role === "employee") ? (
+                <Link to={"/emp"} className="nav-link">
+                  <Avatar size="large" src={currentUser.avatar} style={{ backgroundColor: '#ffffff' }} />
+                </Link>
+              ) : (
+                <Link to={"/admin"} className="nav-link">
+                  <Avatar size="large" src={currentUser.avatar} style={{ backgroundColor: '#ffffff' }} />
+                </Link>
+              )
+            ) : (
+              <Link to={"/"} className="navbar-brand">
+                bezKoder
+              </ Link>
+            )}
+          </div>
           <div className="navbar-nav mr-auto">
             <li className="nav-item">
               <Link to={"/home"} className="nav-link">
                 Home
               </Link>
             </li>
-
-            {showEmployeeBoard && (
-              <li className="nav-item">
-                <Link to={"/employee"} className="nav-link">
-                  Employee Board
-                </Link>
-              </li>
-            )}
-
-            {showAdminBoard && (
-              <li className="nav-item">
-                <Link to={"/admin"} className="nav-link">
-                  Admin Board
-                </Link>
-              </li>
-            )}
-
-            {currentUser && (
-              <li className="nav-item">
-                <Link to={"/user"} className="nav-link">
-                  User
-                </Link>
-              </li>
-            )}
           </div>
 
           {currentUser ? (
             <div className="navbar-nav ml-auto">
               <li className="nav-item">
                 {(currentUser.role === "employee") ? (
-                <Link to={"/employee"} className="nav-link">
-                  {currentUser.username}
-                </Link>
+                  <Link to={"/employee"} className="nav-link">
+                    {currentUser.userName}
+                  </Link>
                 ) : (
-                <Link to={"/admin"} className="nav-link">
-                  {currentUser.username}
-                </Link>
+                  <Link to={"/admin"} className="nav-link">
+                    {currentUser.userName}
+                  </Link>
                 )}
               </li>
               <li className="nav-item">
@@ -132,8 +129,17 @@ class App extends React.Component {
             <Route path="/register" element={<Register />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/user" element={<BoardUser />} />
-            <Route path="/employee" element={<BoardEmployee />} />
-            <Route path="/admin" element={<BoardAdmin />} />
+            <Route path="/employee/*" element={<BoardEmployee />}>
+              <Route path="home" element={<EmployeeHome />} />
+              <Route path="projects" element={<EmployeeProjects />} />
+              <Route path="projects/projectDetails" element={<BoardProject />} />
+            </Route>
+            <Route path="/admin/*" element={<BoardAdmin />}>
+              <Route path="home" element={<AdminHome />} />
+              <Route path="projects" element={<AdminProjects />} />
+              <Route path="projects/projectDetails" element={<BoardProject />} />
+              <Route path="users" element={<AdminUsers />} />
+            </Route>
           </Routes>
         </div>
       </div>

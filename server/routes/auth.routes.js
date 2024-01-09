@@ -18,5 +18,7 @@ module.exports = function (app) {
     controller.signup
   );
 
+  app.post("/api/auth/images", controller.saveImages);
+
   app.post("/api/auth/signin", controller.signin);
 };

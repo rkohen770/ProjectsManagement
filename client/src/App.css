@@ -30,3 +30,48 @@ label {
   -webkit-border-radius: 50%;
   border-radius: 50%;
 }
+
+.container {
+  margin-left: 10px;
+  margin-right: 10px;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+
+.jumbotron{
+  padding: 2rem 1rem;
+}
+
+.header-jumbotron{
+  display: grid;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding-right: 10px;
+}
+
+.footer-jumbotron{
+  display: grid;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  grid-template-columns: 2fr 3fr;
+  padding-right: 10px;
+}
+
+.task-board{
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  flex-direction: row;
+  justify-content: space-around;
+  margin-bottom: 10px;
+}
+
+.tag{
+  margin: 10px;
+  max-height: 70vh;
+  overflow: scroll;
+}
+
+

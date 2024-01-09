@@ -1,3 +1,7 @@
 node_modules
 .env
+<<<<<<< HEAD
 server\config\db.config.js
+=======
+./config/db.config.js
+>>>>>>> 6e39fca12e63670a4b73e2dc916926d46c3569a4

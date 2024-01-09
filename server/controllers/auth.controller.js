@@ -1,5 +1,7 @@
 const db = require("../models");
 const config = require("../config/auth.config");
+const multer = require("multer");
+const path = require("path");
 const User = db.user;
 const Role = db.role;
 
@@ -11,12 +13,13 @@ var bcrypt = require("bcryptjs");
 exports.signup = (req, res) => {
   // Save User to Database
   User.create({
-    username: req.body.username,
+    userName: req.body.userName,
     email: req.body.email,
     password: bcrypt.hashSync(req.body.password, 8),
     role: req.body.role,
     firstName: req.body.firstName,
     lastName: req.body.lastName,
+    avatar: path.join(__dirname, '../../client/public/images/', req.body.avatar),
   })
     .then((user) => {
       if (req.body.role) {
@@ -41,10 +44,30 @@ exports.signup = (req, res) => {
     });
 };
 
+exports.saveImages = (req, res) => {
+  const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, __dirname + '/../../client/public/images');
+    },
+    filename: (req, file, cb) => {
+      cb(null, file.originalname);
+    },
+  });
+
+  const upload = multer({ storage: storage }).single('avatar');
+
+  upload(req, res, (err) => {
+    if (err) {
+      res.status(500).send({ message: err });
+    } else {
+      res.status(200).send({ message: "Uploaded successfully!" });
+    }
+  });
+}
 exports.signin = (req, res) => {
   User.findOne({
     where: {
-      username: req.body.username,
+      userName: req.body.userName,
     },
   })
     .then((user) => {
@@ -72,12 +95,13 @@ exports.signin = (req, res) => {
 
       res.status(200).send({
         id: user.id,
-        username: user.username,
+        userName: user.userName,
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
         role: user.role,
         accessToken: token,
+        avatar: user.avatar,
       });
     })
     .catch((err) => {
