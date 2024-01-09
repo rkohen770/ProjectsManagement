@@ -2,6 +2,7 @@ const db = require("../models");
 const config = require("../config/auth.config");
 const multer = require("multer");
 const path = require("path");
+const os = require("os");
 const User = db.user;
 const Role = db.role;
 
@@ -19,7 +20,7 @@ exports.signup = (req, res) => {
     role: req.body.role,
     firstName: req.body.firstName,
     lastName: req.body.lastName,
-    avatar: path.join(__dirname, '../../client/public/images/', req.body.avatar),
+    avatar: req.body.avatar,
   })
     .then((user) => {
       if (req.body.role) {
@@ -47,13 +48,12 @@ exports.signup = (req, res) => {
 exports.saveImages = (req, res) => {
   const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-      cb(null, __dirname + '/../../client/public/images');
+      cb(null, os.tmpdir()); // Save file in the system's temporary directory
     },
     filename: (req, file, cb) => {
       cb(null, file.originalname);
     },
   });
-
   const upload = multer({ storage: storage }).single('avatar');
 
   upload(req, res, (err) => {
@@ -63,7 +63,7 @@ exports.saveImages = (req, res) => {
       res.status(200).send({ message: "Uploaded successfully!" });
     }
   });
-}
+};
 exports.signin = (req, res) => {
   User.findOne({
     where: {

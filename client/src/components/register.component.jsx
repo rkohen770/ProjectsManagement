@@ -5,6 +5,7 @@ import CheckButton from "react-validation/build/button";
 import { Upload, message as msg} from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import AuthService from "../services/auth.service";
+import s3Service from "../services/s3.service";
 
 const required = value => {
   if (!value) {
@@ -26,8 +27,8 @@ export function Register() {
   const [successful, setSuccessful] = useState(false);
   const [message, setMessage] = useState("");
 
-  const imagesUrl = "http://localhost:8080/api/auth/images";
-
+  //const imagesUrl = "http://localhost:8080/api/auth/images";
+  const imagesUrl = "http://localhost:8080/api/s3/upload";
   const form = useRef();
   const checkBtn = useRef();
 
@@ -111,10 +112,10 @@ export function Register() {
       if (status !== 'uploading') {
         console.log(info.file, info.fileList);
         //TODO: S3
-        setAvatar (info.file.name)
       }
       if (status === 'done') {
         msg.success(`${info.file.name} file uploaded successfully.`);
+        setAvatar (info.file.name)
       } else if (status === 'error') {
         msg.error(`${info.file.name} file upload failed.`);
       }

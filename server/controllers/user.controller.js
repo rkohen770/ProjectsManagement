@@ -48,6 +48,19 @@ exports.create = (req, res) => {
         });
 };
 
+exports.findAllByRole = (req, res) => {
+    const role = req.params.role;
+    User.findAll({ where: { role: role } })
+        .then(data => {
+            res.send(data);
+        })
+        .catch(err => {
+            res.status(500).send({
+                message: "Error retrieving Users with role=" + role
+            });
+        });
+};
+
 exports.findAll = (req, res) => {
     User.findAll()
         .then(data => {

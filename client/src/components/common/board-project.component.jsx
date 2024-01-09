@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { Document, Page } from 'react-pdf';
 import dayjs from 'dayjs';
 import { Button, Descriptions, List, Card, Tooltip, Popconfirm, message, Tag, Progress, ConfigProvider, Space } from "antd";
-import { RollbackOutlined, ArrowLeftOutlined, ArrowRightOutlined, DeleteOutlined } from "@ant-design/icons";
+import { RollbackOutlined, ArrowLeftOutlined, ArrowRightOutlined, DeleteTwoTone } from "@ant-design/icons";
 
 import TaskService from '../../services/task.service';
 import authService from "../../services/auth.service";
@@ -103,54 +103,54 @@ export function BoardProject() {
     let actions = [];
     if (task.status === 'todo') {
       actions.push(
-        <Tooltip title="start task" color="magenta" key={'start'} >
+        <Tooltip title="start task" color="#b7eb8f" key={'start'} >
           <Popconfirm title="Start the task?"
             description="Do you want to start the task now?"
             onConfirm={() => handleStart(task)}
             okText="Yes"
             cancelText="No"
           >
-            <ArrowRightOutlined key="arrow" />
+            <ArrowRightOutlined style={{ color: "green" }} key="arrow" />
           </Popconfirm>
         </Tooltip>,
       )
     }
     else if (task.status === 'in-progress') {
       actions.push(
-        <Tooltip title="suspend task" color="magenta" key={'suspend'} >
+        <Tooltip title="suspend task" color="#b7eb8f" key={'suspend'} >
           <Popconfirm title="Suspend the task?"
             description="Do you want to suspend the task?"
             onConfirm={() => handleSuspend(task)}
             okText="Yes"
             cancelText="No"
           >
-            <ArrowLeftOutlined key="delete" />
+            <ArrowLeftOutlined style={{ color: "green" }} key="delete" />
           </Popconfirm>
         </Tooltip>,
       )
       actions.push(
-        <Tooltip title="finish task" color="magenta" key={'finish'} >
+        <Tooltip title="finish task" color="#b7eb8f" key={'finish'} >
           <Popconfirm title="Finish the task?"
             description="Do you want to set the task as done?"
             onConfirm={() => handleFinish(task)}
             okText="Yes"
             cancelText="No"
           >
-            <ArrowRightOutlined key="delete" />
+            <ArrowRightOutlined style={{ color: "green" }} key="delete" />
           </Popconfirm>
         </Tooltip>,
       )
     }
     else {
       actions.push(
-        <Tooltip title="restart task" color="magenta" key={'restart'} >
+        <Tooltip title="restart task" color="#b7eb8f" key={'restart'} >
           <Popconfirm title="Restart the task?"
             description="Do you want to restart the task?"
             onConfirm={() => handleRestart(task)}
             okText="Yes"
             cancelText="No"
           >
-            <ArrowLeftOutlined key="delete" />
+            <ArrowLeftOutlined style={{ color: "green" }} key="delete" />
           </Popconfirm>
         </Tooltip>,
       )
@@ -165,7 +165,7 @@ export function BoardProject() {
             okText="Yes"
             cancelText="No"
           >
-            <DeleteOutlined key="delete" />
+            <DeleteTwoTone twoToneColor="magenta" key="delete" />
           </Popconfirm>
         </Tooltip>,
       )
@@ -273,7 +273,7 @@ export function BoardProject() {
     <div className="container">
       <div className="jumbotron" >
         <div className="header-jumbotron">
-          <header style={{ display: "flex", justifyContent: "space-between"}}>
+          <header style={{ display: "flex", justifyContent: "space-between" }}>
             <h2> {project ? project.name : ""} </h2>
             <Button icon={<RollbackOutlined />} onClick={() => navigate('../projects')} >Go back</Button>
           </header>

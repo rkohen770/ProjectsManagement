@@ -25,6 +25,10 @@ class UserService {
     return axios.get(API_URL, { headers: authHeader() });
   }
 
+  getAllUsersByRole(role) {
+    return axios.get(API_URL + role, { headers: authHeader() });
+  }
+
   getUserById(id) {
     return axios.get(API_URL + id, { headers: authHeader() });
   }
