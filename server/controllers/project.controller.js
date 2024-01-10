@@ -1,5 +1,9 @@
 const db = require("../models");
 const Project = db.project;
+const path = require("path");
+const os = require("os");
+const fs = require("fs");
+const s3 = require("./s3.controller");
 
 exports.create = (req, res) => {
     // Validate request
@@ -10,12 +14,20 @@ exports.create = (req, res) => {
         return;
     }
 
+    const filePath = path.join(os.tmpdir(), req.body.doc);
+    const docFile = fs.readFileSync(filePath);
+    const docName = `${req.body.name}-doc-${req.body.doc}`;
+    s3.s3Uploader(docName, docFile).then().catch((err) => {
+      res.status(500).send({ message: err });
+      return;
+    });
+
     // Create a Project
     const project = {
         name: req.body.name,
         description: req.body.description,
         deadLine: req.body.deadLine,
-        managerId: req.body.managerId
+        doc: docName,
     };
 
     // Save Project in the database
@@ -37,9 +49,13 @@ exports.create = (req, res) => {
 
 exports.findAll = (req, res) => {
     Project.findAll()
-        .then(data => {
-            res.send(data);
-        })
+    .then(async (data) => {
+        await Promise.all(data.map(async (item) => {
+            item.dataValues.doc = await s3GetSingedUrl(item.dataValues.doc);
+        }));
+
+        res.status(200).send(data);
+    })
         .catch(err => {
             res.status(500).send({
                 message: err.message || "Some error occurred while retrieving projects."
@@ -53,9 +69,13 @@ exports.findAllByUserId = (req, res) => {
     var condition = id ? { managerId: id } : null;
 
     Project.findAll({ where: condition })
-        .then(data => {
-            res.send(data);
-        })
+    .then(async (data) => {
+        await Promise.all(data.map(async (item) => {
+            item.dataValues.doc = await s3GetSingedUrl(item.dataValues.doc);
+        }));
+
+        res.status(200).send(data);
+    })
         .catch(err => {
             res.status(500).send({ message: err.message || "Some error occurred while retrieving projects." });
         });
@@ -64,8 +84,9 @@ exports.findOne = (req, res) => {
     const id = req.params.id;
 
     Project.findByPk(id)
-        .then(data => {
-            res.send(data);
+        .then(async (data) => {
+            data.dataValues.doc = await s3GetSingedUrl(data.dataValues.doc);
+            res.status(200).send(data);
         })
         .catch(err => {
             res.status(500).send({
@@ -76,6 +97,17 @@ exports.findOne = (req, res) => {
 
 exports.update = (req, res) => {
     const id = req.params.id;
+
+    if(req.body.doc){        
+        const filePath = path.join(os.tmpdir(), req.body.doc);
+        const docFile = fs.readFileSync(filePath);
+        const docName = `${req.body.name}-doc-${req.body.doc}`;
+        s3.s3Uploader(docName, docFile).then().catch((err) => {
+          res.status(500).send({ message: err });
+          return;
+        });
+        req.body.doc = docName;
+    }
 
     Project.update(req.body, {
         where: { id: id }
@@ -118,6 +150,20 @@ exports.delete = (req, res) => {
         .catch(err => {
             res.status(500).send({
                 message: "Could not delete Project with id=" + id
-            });
         });
+    });
 };
+
+//get signed url from s3
+async function s3GetSingedUrl(fileName) {
+    try {
+        if (!(fileName.includes("/") || fileName.includes("\\"))) {
+            return await s3.s3GetSingedUrl(fileName);
+        }
+        else {
+          return fileName;
+        }
+    } catch (err) {
+        console.log(err);
+    }
+}

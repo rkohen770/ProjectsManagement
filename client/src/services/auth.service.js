@@ -1,5 +1,7 @@
 import axios from "axios";
 
+import s3Service from "./s3.service";
+
 const API_URL = "http://localhost:8080/api/auth/";
 
 class AuthService {
@@ -22,15 +24,17 @@ class AuthService {
       });
   }
 
-  uploadImage(image) {
-    return axios.post(API_URL + "images", image);
-  }
+  // uploadImage(image) {
+  //   //return axios.post(API_URL + "images", image);
+  //   return s3Service.uploadFile(image);
+  // }
 
   logout() {
     localStorage.removeItem("user");
   }
 
   register(userName, email, password, role, firstName, lastName, avatar) {
+    //s3Service.uploadFile(avatar);
     return axios.post(API_URL + "signup", {
       userName,
       email,

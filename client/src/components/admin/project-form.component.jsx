@@ -4,12 +4,13 @@ import dayjs from 'dayjs';
 import {
   Button,
   message,
-  ColorPicker,
   Form,
   Input,
   Space,
   DatePicker,
+  Upload,
 } from 'antd'
+import { UploadOutlined } from '@ant-design/icons'
 
 import projectService from '../../services/project.service'
 
@@ -20,6 +21,9 @@ ProjectForm.propTypes = {
 export function ProjectForm({ project, onSubmitSuccess }) {
   const [submitLoading, setSubmitLoading] = useState(false)
   const [formProject, setFormProject] = useState(project);
+  const [docName, setDocName] = useState("");
+
+  const docUrl = 'http://localhost:8080/api/auth/temp'
 
   useEffect(() => {
     setFormProject(project);
@@ -33,6 +37,7 @@ export function ProjectForm({ project, onSubmitSuccess }) {
       const newProject = {
         name: values.name,
         description: values.description,
+        doc: docName,
         deadLine: values.deadLine,
       }
       if (formProject) {
@@ -68,6 +73,44 @@ export function ProjectForm({ project, onSubmitSuccess }) {
     message.error('Submit failed!')
   }
 
+  const props = {
+    action: docUrl,
+    enctype: 'multipart/form-data',
+    beforeUpload: (file) => {
+      const isValidDocFormat =
+        //check if file is pdf
+        file.type === 'application/pdf'
+      if (!isValidDocFormat) {
+        message.error(
+          `${file.name} this is not a supported format, please upload a pdf file`
+        )
+        return Upload.LIST_IGNORE
+      }
+      const isValidDocName = /^[\x20-\x7E]+$/.test(file.name);
+      if (!isValidDocName) {
+        message.error(
+          `${file.name} this is not a supported name, please upload a pdf file with a name that contains only ascii characters`
+        )
+        return Upload.LIST_IGNORE
+      }
+    },
+    listType: 'picture-card',
+    maxCount: 1,
+    accept: '.pdf',
+    onChange(info) {
+      const { status } = info.file;
+      if (status !== 'uploading') {
+        console.log(info.file, info.fileList);
+      }
+      if (status === 'done') {
+        message.success(`${info.file.name} file uploaded successfully.`);
+        setDocName(info.file.name)
+      } else if (status === 'error') {
+        message.error(`${info.file.name} file upload failed.`);
+      }
+    },
+  }
+
   return (
     <>
       <Form
@@ -88,6 +131,7 @@ export function ProjectForm({ project, onSubmitSuccess }) {
         initialValues={{
           name: formProject ? formProject.name : 'new project',
           description: formProject ? formProject.description : 'this is a new project',
+          doc: formProject ? formProject.doc : '',
           deadLine: formProject ? dayjs(formProject.deadLine) : dayjs(),
         }}
       >
@@ -103,6 +147,14 @@ export function ProjectForm({ project, onSubmitSuccess }) {
         </Form.Item>
         <Form.Item name="description" label="description">
           <Input.TextArea />
+        </Form.Item>
+        <Form.Item name="doc" label="docoment">
+          <Upload.Dragger {...props} name="temp">
+            <div>
+              <UploadOutlined />
+              <div style={{ marginTop: 8 }}>drop here</div>
+            </div>
+          </Upload.Dragger>
         </Form.Item>
         <Form.Item name="deadLine" label="deadLine">
           <DatePicker format={'DD/MM/YYYY'} />

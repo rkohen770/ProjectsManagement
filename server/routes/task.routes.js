@@ -4,8 +4,11 @@ module.exports = function (app) {
   // Create a new Task
   app.post("/api/tasks", controller.create);
 
+  // Retrieve all Tasks
+  app.get("/api/tasks", controller.findAll);
+
   // Retrieve all Tasks by Project Id
-  app.get("/api/tasks/:projectId", controller.findAll);
+  app.get("/api/tasks/:projectId", controller.findAllByProjectId);
 
   // Retrieve a single Task with id
   app.get("/api/tasks/:id", controller.findOne);

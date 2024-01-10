@@ -32,8 +32,18 @@ exports.create = (req, res) => {
         });
 };
 
-//retrives all the tasks asosiated with a project id
 exports.findAll = (req, res) => {
+    Task.findAll()
+        .then(data => {
+            res.send(data);
+        })
+        .catch(err => {
+            res.status(500).send({ message: err.message || "Some error occurred while retrieving tasks." });
+        });
+};
+
+//retrives all the tasks asosiated with a project id
+exports.findAllByProjectId = (req, res) => {
     const projectId = req.params.projectId;
     var condition = projectId ? { projectId: projectId } : null;
 

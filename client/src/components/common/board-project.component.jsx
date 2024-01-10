@@ -1,10 +1,16 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import PropTypes from 'prop-types';
-import { Document, Page } from 'react-pdf';
+import { Worker } from '@react-pdf-viewer/core';
+// Import the main component
+import { Viewer } from '@react-pdf-viewer/core';
+
+// Import the styles
+import '@react-pdf-viewer/core/lib/styles/index.css';
+
 import dayjs from 'dayjs';
-import { Button, Descriptions, List, Card, Tooltip, Popconfirm, message, Tag, Progress, ConfigProvider, Space } from "antd";
-import { RollbackOutlined, ArrowLeftOutlined, ArrowRightOutlined, DeleteOutlined } from "@ant-design/icons";
+import { Button, Descriptions, List, Card, Tooltip, Popconfirm, message, Tag, Progress, ConfigProvider, Space, Modal } from "antd";
+import { RollbackOutlined, ArrowLeftOutlined, ArrowRightOutlined, DeleteTwoTone } from "@ant-design/icons";
 
 import TaskService from '../../services/task.service';
 import authService from "../../services/auth.service";
@@ -16,6 +22,7 @@ export function BoardProject() {
   const [tasksTodo, setTasksTodo] = useState([]);
   const [tasksInProgress, setTasksInProgress] = useState([]);
   const [tasksDone, setTasksDone] = useState([]);
+  const [viewDocumentDialogIsOpen, setViewDocumentDialogIsOpen] = useState(false);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -29,7 +36,7 @@ export function BoardProject() {
         setUser(user);
 
         let projectTasks = [];
-        const res = await TaskService.getAllTasks(project.id);
+        const res = await TaskService.getAllTasksByProjectId(project.id);
         if (res.status === 200) {
           //projectTasks = user ? res.data.filter(task => task.employeeId == user.id) : res.data;
           projectTasks = res.data;
@@ -83,8 +90,10 @@ export function BoardProject() {
         size="small"
         actions={hasPremission ? actions(task) : []} >
         <Descriptions
-          column={2}
-          layout="vertical"
+          column={1}
+          layout="horizontal"
+          size="small"
+          style={{overflow: 'hidden'}}
           items={[
             {
               label: 'Description',
@@ -103,54 +112,54 @@ export function BoardProject() {
     let actions = [];
     if (task.status === 'todo') {
       actions.push(
-        <Tooltip title="start task" color="magenta" key={'start'} >
+        <Tooltip title="start task" color="#b7eb8f" key={'start'} >
           <Popconfirm title="Start the task?"
             description="Do you want to start the task now?"
             onConfirm={() => handleStart(task)}
             okText="Yes"
             cancelText="No"
           >
-            <ArrowRightOutlined key="arrow" />
+            <ArrowRightOutlined style={{ color: "green" }} key="arrow" />
           </Popconfirm>
         </Tooltip>,
       )
     }
     else if (task.status === 'in-progress') {
       actions.push(
-        <Tooltip title="suspend task" color="magenta" key={'suspend'} >
+        <Tooltip title="suspend task" color="#b7eb8f" key={'suspend'} >
           <Popconfirm title="Suspend the task?"
             description="Do you want to suspend the task?"
             onConfirm={() => handleSuspend(task)}
             okText="Yes"
             cancelText="No"
           >
-            <ArrowLeftOutlined key="delete" />
+            <ArrowLeftOutlined style={{ color: "green" }} key="delete" />
           </Popconfirm>
         </Tooltip>,
       )
       actions.push(
-        <Tooltip title="finish task" color="magenta" key={'finish'} >
+        <Tooltip title="finish task" color="#b7eb8f" key={'finish'} >
           <Popconfirm title="Finish the task?"
             description="Do you want to set the task as done?"
             onConfirm={() => handleFinish(task)}
             okText="Yes"
             cancelText="No"
           >
-            <ArrowRightOutlined key="delete" />
+            <ArrowRightOutlined style={{ color: "green" }} key="delete" />
           </Popconfirm>
         </Tooltip>,
       )
     }
     else {
       actions.push(
-        <Tooltip title="restart task" color="magenta" key={'restart'} >
+        <Tooltip title="restart task" color="#b7eb8f" key={'restart'} >
           <Popconfirm title="Restart the task?"
             description="Do you want to restart the task?"
             onConfirm={() => handleRestart(task)}
             okText="Yes"
             cancelText="No"
           >
-            <ArrowLeftOutlined key="delete" />
+            <ArrowLeftOutlined style={{ color: "green" }} key="delete" />
           </Popconfirm>
         </Tooltip>,
       )
@@ -165,7 +174,7 @@ export function BoardProject() {
             okText="Yes"
             cancelText="No"
           >
-            <DeleteOutlined key="delete" />
+            <DeleteTwoTone twoToneColor="magenta" key="delete" />
           </Popconfirm>
         </Tooltip>,
       )
@@ -269,11 +278,16 @@ export function BoardProject() {
     }
   }
 
+  const handleViewDocument = () => {
+    setViewDocumentDialogIsOpen(true);
+  }
+
+
   return (
     <div className="container">
       <div className="jumbotron" >
         <div className="header-jumbotron">
-          <header style={{ display: "flex", justifyContent: "space-between"}}>
+          <header style={{ display: "flex", justifyContent: "space-between" }}>
             <h2> {project ? project.name : ""} </h2>
             <Button icon={<RollbackOutlined />} onClick={() => navigate('../projects')} >Go back</Button>
           </header>
@@ -293,7 +307,7 @@ export function BoardProject() {
                 children: project ? dayjs(project.deadline).format('DD/MM/YYYY') : "",
               }]} />
             {/* TO DO: adding option to present docoment in pdf format */}
-            <Button type="link" onClick={() => { }}>View Document</Button>
+            <Button type="link" onClick={() => { handleViewDocument() }}>View Document</Button>
           </div>
           <ConfigProvider
             theme={{
@@ -325,6 +339,24 @@ export function BoardProject() {
         <Tag className="tag" color="processing"> <TaskCardList data={tasksInProgress} title="In Progress List" /></Tag>
         <Tag className="tag" color="success"><TaskCardList data={tasksDone} title="Done List" /></Tag>
       </div>
+     
+      <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
+      <Modal
+        title="View Document"
+        footer={null}
+        closable={true}
+        open={viewDocumentDialogIsOpen}
+        destroyOnClose={true}
+        width={600}
+        hgith={750}
+        onCancel={() => setViewDocumentDialogIsOpen(false)}
+      >  
+        {project && project.doc ? <Viewer fileUrl={project ? project.doc : ""} />
+        : <p>There is no document to show</p>}
+
+        </Modal> 
+      </Worker>
+
     </div>
   );
 }

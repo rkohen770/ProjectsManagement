@@ -16,6 +16,9 @@ module.exports = function (app) {
   // Retrieve all Users
   app.get("/api/users", controller.findAll);
 
+  // Retrieve all Users by role
+  app.get("/api/users/:role", controller.findAllByRole);
+
   // Retrieve a single User with id
   app.get("/api/users/:id", controller.findOne);
 
