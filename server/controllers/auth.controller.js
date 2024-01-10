@@ -3,6 +3,8 @@ const config = require("../config/auth.config");
 const multer = require("multer");
 const path = require("path");
 const os = require("os");
+const fs = require("fs");
+const s3 = require("./s3.controller");
 const User = db.user;
 const Role = db.role;
 
@@ -11,8 +13,16 @@ const Op = db.Sequelize.Op;
 var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
 
-exports.signup = (req, res) => {
-  // Save User to Database
+exports.signup = async (req, res) => {
+  //get the image from the os.tmpdir() directory by the name req.body.avatar
+  const imagePath = path.join(os.tmpdir(), req.body.avatar);
+  const avatarFile = fs.readFileSync(imagePath);
+  const avatarName = `${req.body.email}-avatar-${req.body.avatar}`;
+  s3.s3Uploader(avatarName, avatarFile).then().catch((err) => {
+    res.status(500).send({ message: err });
+    return;
+  });
+
   User.create({
     userName: req.body.userName,
     email: req.body.email,
@@ -20,7 +30,7 @@ exports.signup = (req, res) => {
     role: req.body.role,
     firstName: req.body.firstName,
     lastName: req.body.lastName,
-    avatar: req.body.avatar,
+    avatar: avatarName,
   })
     .then((user) => {
       if (req.body.role) {
@@ -45,7 +55,7 @@ exports.signup = (req, res) => {
     });
 };
 
-exports.saveImages = (req, res) => {
+exports.tempUpload = (req, res) => {
   const storage = multer.diskStorage({
     destination: (req, file, cb) => {
       cb(null, os.tmpdir()); // Save file in the system's temporary directory
@@ -54,7 +64,7 @@ exports.saveImages = (req, res) => {
       cb(null, file.originalname);
     },
   });
-  const upload = multer({ storage: storage }).single('avatar');
+  const upload = multer({ storage: storage }).single('temp');
 
   upload(req, res, (err) => {
     if (err) {
@@ -70,7 +80,7 @@ exports.signin = (req, res) => {
       userName: req.body.userName,
     },
   })
-    .then((user) => {
+    .then( async (user) => {
       if (!user) {
         return res.status(404).send({ message: "User Not found." });
       }
@@ -93,7 +103,18 @@ exports.signin = (req, res) => {
         expiresIn: 86400, // 24 hours
       });
 
-      res.status(200).send({
+      //if user.avatar is not a path, then it is a file name
+      //get the image from the aws s3 bucket by the name user.avatar
+      let signedUrl = "";
+      if (!(user.avatar.includes("/") || user.avatar.includes("\\"))) {
+        try {
+          signedUrl = await s3.s3GetSingedUrl(user.avatar);
+        } catch (err) {
+          console.log(err);
+        }
+      }
+
+      const clientUser = {
         id: user.id,
         userName: user.userName,
         firstName: user.firstName,
@@ -101,8 +122,10 @@ exports.signin = (req, res) => {
         email: user.email,
         role: user.role,
         accessToken: token,
-        avatar: user.avatar,
-      });
+        avatar: signedUrl === "" ? user.avatar : signedUrl,
+      };
+
+      res.status(200).send(clientUser);
     })
     .catch((err) => {
       res.status(500).send({ message: err.message });

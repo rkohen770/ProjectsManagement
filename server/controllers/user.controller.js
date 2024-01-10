@@ -1,5 +1,7 @@
 const db = require("../models");
 const User = db.user;
+const s3 = require("./s3.controller");
+
 exports.allAccess = (req, res) => {
   res.status(200).send("Public Content.");
 };
@@ -51,8 +53,12 @@ exports.create = (req, res) => {
 exports.findAllByRole = (req, res) => {
     const role = req.params.role;
     User.findAll({ where: { role: role } })
-        .then(data => {
-            res.send(data);
+        .then(async (data) => {
+            await Promise.all(data.map(async (item) => {
+                item.dataValues.avatar = await s3GetSingedUrl(item.dataValues.avatar);
+            }));
+
+            res.status(200).send(data);
         })
         .catch(err => {
             res.status(500).send({
@@ -63,10 +69,14 @@ exports.findAllByRole = (req, res) => {
 
 exports.findAll = (req, res) => {
     User.findAll()
-        .then(data => {
-            res.send(data);
-        })
-        .catch(err => {
+    .then(async (data) => {
+        await Promise.all(data.map(async (item) => {
+            item.dataValues.avatar = await s3GetSingedUrl(item.dataValues.avatar);
+        }));
+
+        res.status(200).send(data);
+    })
+    .catch(err => {
             res.status(500).send({
                 message: err.message || "Some error occurred while retrieving users."
             });
@@ -77,8 +87,9 @@ exports.findOne = (req, res) => {
     const id = req.params.id;
 
     User.findByPk(id)
-        .then(data => {
-            res.send(data);
+        .then(async (data) => {
+            data.dataValues.avatar = await s3GetSingedUrl(data.dataValues.avatar);
+            res.status(200).send(data);
         })
         .catch(err => {
             res.status(500).send({
@@ -134,3 +145,17 @@ exports.delete = (req, res) => {
             });
         });
 };
+
+//get signed url from s3
+async function s3GetSingedUrl(fileName) {
+    if (!(fileName.includes("/") || fileName.includes("\\"))) {
+      try {
+        return await s3.s3GetSingedUrl(fileName);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+    else {
+      return fileName;
+    }
+}

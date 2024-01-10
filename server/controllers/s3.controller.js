@@ -1,5 +1,8 @@
 //Amazon S3 controller
-const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+const { S3Client, PutObjectCommand, GetObjectCommand, PutBucketCorsCommand } = require('@aws-sdk/client-s3');
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+
+const e = require('express');
 const fs = require('fs');
 const multer = require('multer');
 
@@ -15,54 +18,99 @@ const s3 = new S3Client({
         secretAccessKey: secretAccessKey
     }
 });
-// Uploads a file to S3
-const storage = multer.memoryStorage(); // Use memoryStorage so the file will be available as a buffer in the 'file' object
-const upload = multer({ storage: storage }).single('avatar'); // 
+
+const params = {
+    Bucket: BUCKET,
+    CORSConfiguration: {
+      CORSRules: [
+        {
+          AllowedHeaders: ["*"],
+          AllowedMethods: ["GET"],
+          AllowedOrigins: ["*"],
+          MaxAgeSeconds: 3000
+        }
+      ]
+    }
+  };
+  const run = async () => {
+    try {
+      const data = await s3.send(new PutBucketCorsCommand(params));
+      console.log("Success", data);
+    } catch (err) {
+      console.log("Error", err);
+    }
+  };
+  
+  run();
 exports.uploadFile = (req, res) => {
     try {
-        upload(req, res, (err) => {
-            if (err) {
-                res.status(500).send(err);
-                return;
-            }
-    
-            const file = req.file;
-            const fileName = file.originalname;
-            const fileType = file.mimetype;
-
-            const putCommand = new PutObjectCommand({
-                Bucket: BUCKET,
-                Key: fileName,
-                Body: file.buffer,
-                ContentType: fileType
-            });
-
-            s3.send(putCommand)
-                .then((data) => {
-                    res.status(200).send({ message: "Uploaded successfully!" });
-                })
-                .catch((err) => {
-                    res.status(500).send({ message: err });
-                });
-    
+        const file = req.file;
+        const fileName = file.originalname;
+        s3Uploader(fileName, file.buffer).then((data) => {
+            res.status(200).send({ message: "Uploaded successfully!" });
+        }).catch((err) => {
+            res.status(500).send({ message: err });
         });
     } catch (error) {
         console.log(error);
+        res.status(500).send({ message: error });
     }
 };
 
-// Downloads a file from S3
-
 exports.downloadFile = (req, res) => {
-    const fileName = req.params.name;
+    try {
+        const fileName = req.params.name;
+        s3Downloader(fileName).then((data) => {
+            res.status(200).send(data);
+        }).catch((err) => {
+            res.status(500).send({ message: err });
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ message: error });
+    }
+}
 
-    const params = {
+exports.s3Uploader = async (fileName, fileBuffer) => {
+    const putCommand = new PutObjectCommand({
+        Bucket: BUCKET,
+        Key: fileName,
+        Body: fileBuffer,
+    });
+
+    try {
+        const data = await s3.send(putCommand);
+        return data;
+    } catch (error) {
+        console.log(error);
+        return error;
+    }
+}
+
+exports.s3Downloader = async (fileName) => {
+    const getCommand = new GetObjectCommand({
         Bucket: BUCKET,
         Key: fileName
-    };
+    });
 
-    res.attachment(fileName);
+    try {
+        const data = await s3.send(getCommand);
+        return data;
+    } catch (error) {
+        console.log(error);
+        return error;
+    }
+}
 
-    const fileStream = s3.getObject(params).createReadStream();
-    fileStream.pipe(res);
-};
+exports.s3GetSingedUrl = async (fileName) => {
+    const getCommand = new GetObjectCommand({
+        Bucket: BUCKET,
+        Key: fileName,
+        ACL:'public-read',
+    });
+
+    const signedUrlExpireSeconds = 60 * 60; // 1 hour
+
+    const url = await getSignedUrl(s3, getCommand, { expiresIn: signedUrlExpireSeconds });
+    return url;
+}

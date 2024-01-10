@@ -27,8 +27,7 @@ export function Register() {
   const [successful, setSuccessful] = useState(false);
   const [message, setMessage] = useState("");
 
-  //const imagesUrl = "http://localhost:8080/api/auth/images";
-  const imagesUrl = "http://localhost:8080/api/s3/upload";
+  const imagesUrl = "http://localhost:8080/api/auth/temp";
   const form = useRef();
   const checkBtn = useRef();
 
@@ -91,6 +90,8 @@ export function Register() {
 
   const props = {
     action: imagesUrl,
+    enctype: "multipart/form-data",
+    method: "post",
     beforeUpload: (file) => {
       const isValidImageFormat =
         //check if file is an image
@@ -109,10 +110,6 @@ export function Register() {
     accept: '.png,.jpeg,.jpg',
     onChange(info) {
       const { status } = info.file;
-      if (status !== 'uploading') {
-        console.log(info.file, info.fileList);
-        //TODO: S3
-      }
       if (status === 'done') {
         msg.success(`${info.file.name} file uploaded successfully.`);
         setAvatar (info.file.name)
@@ -191,10 +188,9 @@ export function Register() {
                 />
               </div>
 
-
               <div className="form-group">
                 <label htmlFor="avatar">Avatar</label>
-                <Upload.Dragger {...props} name="avatar">
+                <Upload.Dragger {...props} name="temp">
                   <div>
                     <UploadOutlined />
                     <div style={{ marginTop: 8 }}>drop here</div>

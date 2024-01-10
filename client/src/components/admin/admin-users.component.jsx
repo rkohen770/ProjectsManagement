@@ -58,7 +58,7 @@ export function AdminUsers() {
       }
       fetchEmpTasks();
     }
-      , [employeeTasks, item.id]);
+      , []);
 
     const getChildren = () => {
 
