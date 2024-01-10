@@ -11,7 +11,6 @@ export function EmployeeProjects() {
 
   const [projects, setProjects] = useState([])
   const [selectedProject, setSelectedProject] = useState(null);
-  const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
   const fetchData = async () => {
