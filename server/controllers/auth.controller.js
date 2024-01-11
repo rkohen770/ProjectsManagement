@@ -131,3 +131,62 @@ exports.signin = (req, res) => {
       res.status(500).send({ message: err.message });
     });
 };
+
+exports.updateUser = async (req, res) => {
+  const id = req.params.id;
+  const updatedUser = updateHelper(req.body);
+
+  User.update(updatedUser,
+    {
+      where: { id: id },
+    }
+  )
+    .then((num) => {
+      if (num == 1) {
+        res.status(200).send({
+                  message: "User was updated successfully.",
+              });
+          }
+        else {
+          res.status(400).send({
+            message: `Cannot update User with id=${id}. Maybe User was not found or req.body is empty!`,
+          });
+      }
+    })
+    .catch((err) => {
+      res.status(500).send({ message:"Error updating User with id=" + id });
+    });
+}
+
+updateHelper = (updatedUser) => {
+  //get the old user by id
+  const oldUser = User.findByPk(updatedUser.id);
+
+  let newAvatar = oldUser.avatar;
+  if(updatedUser.avatar) {
+    try {
+      new URL(updatedUser.avatar);
+      // If we reach here, then the URL is valid
+    } catch (_) {
+      const imagePath = path.join(os.tmpdir(), updatedUser.avatar);
+      const avatarFile = fs.readFileSync(imagePath);
+      const avatarName = `${updatedUser.email}-avatar-${updatedUser.avatar}`;
+      s3.s3Uploader(avatarName, avatarFile).then().catch((err) => {
+        res.status(500).send({ message: err });
+        return;
+      });
+        newAvatar = avatarName;
+      }
+    }
+  const newUser = {
+    userName: updatedUser.userName ? updatedUser.userName : oldUser.userName,
+    email: updatedUser.email ? updatedUser.email : oldUser.email,
+    password: updatedUser.password ? bcrypt.hashSync(updatedUser.password, 8) : oldUser.password,
+    role: oldUser.role,
+    firstName: updatedUser.firstName ? updatedUser.firstName: oldUser.firstName,
+    lastName: updatedUser.lastName ? updatedUser.lastName: oldUser.lastName,
+    avatar: newAvatar,
+  };
+
+  return newUser;
+}
