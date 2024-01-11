@@ -5,3 +5,4 @@ client/public/images/M&R_WED-105.jpg
 client/public/images/M&R_WED-129.jpg
 client/public/images/M&R_WED-245.jpg
 .env
+node_modules
