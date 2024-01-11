@@ -63,9 +63,9 @@ class App extends React.Component {
     const { currentUser } = this.state;
 
     return (
-      <UserContext.Provider value={{ 
-        currentUser: this.state.currentUser, 
-        setCurrentUser: this.setCurrentUser 
+      <UserContext.Provider value={{
+        currentUser: this.state.currentUser,
+        setCurrentUser: this.setCurrentUser
       }}>
         <div style={{ height: '100%' }}>
           <nav className="navbar navbar-expand navbar-dark bg-dark">
@@ -82,7 +82,7 @@ class App extends React.Component {
                 )
               ) : (
                 <Link to={"/"} className="navbar-brand">
-                  bezKoder
+                  Project Management
                 </ Link>
               )}
             </div>

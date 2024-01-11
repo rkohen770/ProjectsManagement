@@ -12,7 +12,7 @@ export function Profile() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [avatar, setAvatar] = useState(null);
-  const [load, setLoad] = useState(true);
+  const [load, setLoad] = useState(false);
 
   const { currentUser, setCurrentUser } = useContext(UserContext);
 
@@ -122,6 +122,7 @@ export function Profile() {
   const handleEdit = () => {
     form.setFieldsValue({ currentUser })
     setIsModalVisible(true);
+    setLoad(!load);
   }
 
   return (

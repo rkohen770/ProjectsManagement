@@ -157,7 +157,7 @@ exports.delete = (req, res) => {
 //get signed url from s3
 async function s3GetSingedUrl(fileName) {
     try {
-        if (!(fileName.includes("/") || fileName.includes("\\"))) {
+        if (!(fileName?.includes("/") || fileName?.includes("\\"))) {
             return await s3.s3GetSingedUrl(fileName);
         }
         else {

@@ -44,24 +44,23 @@ export function AdminUsers() {
       async function fetchEmpTasks() {
         const response = await TaskService.getAllTasks();
         const projects = await ProjectService.getAllProjects();
-        if (response.status === 200 && projects.status === 200) {
-          setEmployeeTasks(response.data.filter(task => task.employeeId === item.id));
-          setTotalTasks(employeeTasks.length);
-          setTotalProjects(employeeTasks.reduce((acc, task) => { return acc.includes(task.projectId) ? acc : [...acc, task.projectId] }, []).length);
-          setTodoTasks(employeeTasks.filter(task => task.status === 'todo').length);
-          setInProgressTasks(employeeTasks.filter(task => task.status === 'in-progress').length);
-          setDoneTasks(employeeTasks.filter(task => task.status === 'done').length);
+        if (response.status === 200 && projects?.status === 200) {
+          const employeeTasks = response.data.filter(task => task.employeeId === item.id);
+          setEmployeeTasks(employeeTasks);
+          setTotalTasks(employeeTasks?.length);
+          setTotalProjects(employeeTasks?.reduce((acc, task) => { return acc?.includes(task.projectId) ? acc : [...acc, task.projectId] }, [])?.length);
+          setTodoTasks(employeeTasks?.filter(task => task.status === 'todo')?.length);
+          setInProgressTasks(employeeTasks?.filter(task => task.status === 'in-progress')?.length);
+          setDoneTasks(employeeTasks?.filter(task => task.status === 'done')?.length);
         } else {
           console.log(response.message);
           message.error(response.message);
         }
       }
       fetchEmpTasks();
-    }
-      , []);
+    }, []);
 
     const getChildren = () => {
-
       return (
         <div>
           <Descriptions
