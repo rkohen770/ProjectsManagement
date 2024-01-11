@@ -30,7 +30,7 @@ class UserService {
   }
 
   getUserById(id) {
-    return axios.get(API_URL + id, { headers: authHeader() });
+    return axios.get(API_URL + 'getUser/' + id);
   }
 
   createUser(data) {

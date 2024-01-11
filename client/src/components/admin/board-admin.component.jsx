@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate, Navigate   } from 'react-router-dom';
+
 import { Menu } from 'antd'
 import AuthService from '../../services/auth.service';
 import {
@@ -38,7 +39,12 @@ export function BoardAdmin() {
     setCurrentUser(currentUser);
     setUserReady(true);
 
+
   }, []);
+
+  if (redirect) {
+    return <Navigate to={redirect} />
+  }
 
   const onSelect = (item) => {
     switch (item.key) {
@@ -64,12 +70,12 @@ export function BoardAdmin() {
           style={{
             width: 256,
           }}
-          defaultSelectedKeys={['1']}
+          defaultSelectedKeys={['home']}
           mode="inline"
           items={items}
           onSelect={onSelect}
         />
-        <Outlet />
+        <Outlet/>
       </div>
     </div>
   );

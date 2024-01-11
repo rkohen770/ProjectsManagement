@@ -20,7 +20,7 @@ module.exports = function (app) {
   app.get("/api/users/:role", controller.findAllByRole);
 
   // Retrieve a single User with id
-  app.get("/api/users/:id", controller.findOne);
+  app.get("/api/users/getUser/:id", controller.findOne);
 
   // Update a User with id
   app.put("/api/users/:id", controller.update);

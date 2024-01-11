@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { List, Card, message, Avatar, Descriptions, Collapse, Tooltip } from "antd";
+import { List, Card, message, Avatar, Descriptions, Collapse, Tooltip, Space } from "antd";
 import { FolderOpenOutlined, FormOutlined, TagOutlined } from '@ant-design/icons';
 import PropTypes from 'prop-types';
 
@@ -65,7 +65,7 @@ export function AdminUsers() {
       return (
         <div>
           <Descriptions
-            labelStyle={{color:'orange'}}
+            labelStyle={{ color: 'orange' }}
             column={1}
             size="small"
             items={[
@@ -96,9 +96,11 @@ export function AdminUsers() {
     return (
       <UserContext.Provider value={{ user: item }}>
         <Collapse
+          size="small"
+          style={{ width: 200, margin: 'auto' }}
           items={[{
             key: `${item.id}`,
-            label: <div><Avatar src={item.avatar} alt="avatar" />{item.userName}</div>,
+            label: <Space size={5}><Avatar src={item.avatar} alt="avatar" />{item.userName}</Space>,
             children: getChildren()
           }]} />
       </UserContext.Provider >
@@ -108,7 +110,7 @@ export function AdminUsers() {
   return (
     <div className="container">
       <header className="jumbotron">
-        <h3>Admin Users</h3>
+        <h3>Users List</h3>
       </header>
       <List
         dataSource={users}
