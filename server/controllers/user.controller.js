@@ -1,4 +1,7 @@
 const db = require("../models");
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
 const User = db.user;
 const s3 = require("./s3.controller");
 
@@ -88,7 +91,8 @@ exports.findOne = (req, res) => {
 
     User.findByPk(id)
         .then(async (data) => {
-            data.dataValues.avatar = await s3GetSingedUrl(data.dataValues.avatar);
+            const S3avatar = await s3GetSingedUrl(data.dataValues.avatar);
+            data.dataValues.avatar = S3avatar;
             res.status(200).send(data);
         })
         .catch(err => {
@@ -101,13 +105,36 @@ exports.findOne = (req, res) => {
 exports.update = (req, res) => {
     const id = req.params.id;
 
+    if(req.body.avatar && !req.body.avatar?.includes("http")) {
+        const imagePath = path.join(os.tmpdir(), req.body.avatar);
+        const avatarFile = fs.readFileSync(imagePath);
+        if (avatarFile) {
+            const avatarName = `${req.body.email}-avatar-${req.body.avatar}`;
+            req.body.avatar = avatarName;
+            s3.s3Uploader(avatarName, avatarFile).then().catch((err) => {
+                res.status(500).send({ message: err });
+                return;
+            });
+        }
+    } 
+
     User.update(req.body, {
         where: { id: id }
     })
-        .then(num => {
+        .then(async num => {
             if (num == 1) {
-                res.send({
-                    message: "User was updated successfully."
+                User.findByPk(id)
+                .then(async (data) => {
+                    data.dataValues.avatar = await s3GetSingedUrl(data.dataValues.avatar);
+                    res.status(200).send({
+                        message: "User was updated successfully.",
+                        user: data.dataValues
+                    });
+                })
+                .catch(err => {
+                    res.status(500).send({
+                        message: "Error retrieving User with id=" + id
+                    });
                 });
             } else {
                 res.send({
