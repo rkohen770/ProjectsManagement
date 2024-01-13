@@ -142,6 +142,7 @@ exports.delete = (req, res) => {
                     message: "Project was deleted successfully!"
                 });
             } else {
+                
                 res.send({
                     message: `Cannot delete Project with id=${id}. Maybe Project was not found!`
                 });
