@@ -5,7 +5,7 @@
 This is a project management system with two types of users with different permissions - managers and employees.
 
 
-![screen_capture.gif](./screenshots/project-managment-overview.gif)
+![screen_capture.gif](screenshots/project-managment-overview.gif)
 
 
 Employees can:
